@@ -1,0 +1,53 @@
+name: Core GTM signals
+description: Default outreach angles from hiring, pages, tech stack and GitHub.
+rules:
+  - id: hiring-ats
+    when:
+      hiring_platform: true
+    angle: "Hiring via {ats}: open roles are a growth signal, reference them."
+    priority: 10
+
+  - id: careers-live
+    when:
+      has_page: [careers, jobs]
+      hiring_platform: false
+    angle: "Careers page is live: check open roles as a growth signal."
+    priority: 9
+
+  - id: pricing-public
+    when:
+      has_page: [pricing]
+    angle: "Public pricing page: self-serve motion, lead with time-to-value."
+    priority: 8
+
+  - id: customers-public
+    when:
+      has_page: [customers]
+    angle: "Public customer page: reference a similar customer story."
+    priority: 7
+
+  - id: analytics-in-place
+    when:
+      has_tech: [Segment, Mixpanel, Amplitude, PostHog]
+    angle: "Product analytics in place: data-driven team, lead with metrics."
+    priority: 6
+
+  - id: no-chat
+    when:
+      lacks_tech: [Intercom, Drift, Zendesk, Crisp]
+    angle: "No chat widget in homepage HTML: possible inbound gap."
+    verify: true
+    priority: 3
+
+  - id: no-crm
+    when:
+      lacks_tech: [HubSpot, Salesforce/Pardot, Marketo]
+    angle: "No CRM/marketing tag in homepage HTML: tooling may be early."
+    verify: true
+    priority: 2
+
+  - id: github-presence
+    when:
+      github_min_repos: 1
+    angle: "Public GitHub presence: developer-led motion, technical outreach can land."
+    priority: 1

@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""GTM Account Research Agent v0.2
+"""GTM Account Research Agent v0.3
 
 Usage:
   python acr.py stripe.com
   python acr.py stripe.com --github stripe
   python acr.py --file domains.txt --json
+  python acr.py --playbooks my-rules.yml stripe.com
+  python acr.py --check-playbooks
 """
 
 import argparse
 import json
 import os
 import re
+import sys
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
@@ -20,9 +23,15 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-VERSION = "0.2"
-UA = "Mozilla/5.0 (compatible; GTMResearchBot/0.2)"
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
+VERSION = "0.3"
+UA = "Mozilla/5.0 (compatible; GTMResearchBot/0.3)"
 TIMEOUT = 12
+DEFAULT_PLAYBOOKS = Path(__file__).resolve().parent / "playbooks"
 
 TECH = {
     "HubSpot": ["js.hs-scripts.com", "js.hsforms.net", "hs-analytics.net"],
@@ -73,6 +82,20 @@ SOCIAL = [
 
 PAGES = ["about", "careers", "jobs", "pricing", "blog", "customers"]
 
+COND_KEYS = {
+    "has_tech",
+    "has_all_tech",
+    "lacks_tech",
+    "has_page",
+    "lacks_page",
+    "hiring_platform",
+    "github_min_repos",
+    "github_language",
+    "text_contains",
+}
+
+
+# ---------------------------------------------------------------- fetching
 
 def get(url, headers=None, retries=1):
     h = {"User-Agent": UA}
@@ -198,13 +221,135 @@ def github_info(name):
     }
 
 
-def outreach_angles(site, gh):
+# --------------------------------------------------------------- playbooks
+
+def as_list(v):
+    if v is None:
+        return []
+    if isinstance(v, (list, tuple, set)):
+        return [str(x).lower() for x in v]
+    return [str(v).lower()]
+
+
+def load_playbooks(path):
+    """Return (rules, errors). path may be a file or a folder of .yml files."""
+    rules, errors = [], []
+    if yaml is None:
+        return rules, ["PyYAML is not installed. Run: pip install pyyaml"]
+    p = Path(path)
+    if p.is_dir():
+        files = sorted(list(p.glob("*.yml")) + list(p.glob("*.yaml")))
+    elif p.exists():
+        files = [p]
+    else:
+        return rules, [f"playbook path not found: {path}"]
+    if not files:
+        return rules, [f"no .yml files in {path}"]
+
+    for f in files:
+        try:
+            data = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError as e:
+            errors.append(f"{f.name}: invalid YAML ({str(e).splitlines()[0]})")
+            continue
+        if not isinstance(data, dict) or not isinstance(data.get("rules"), list):
+            errors.append(f"{f.name}: needs a top-level 'rules:' list")
+            continue
+        pb_name = str(data.get("name") or f.stem)
+        for i, rule in enumerate(data["rules"], 1):
+            where = f"{f.name} rule #{i}"
+            if not isinstance(rule, dict):
+                errors.append(f"{where}: must be a mapping")
+                continue
+            if not rule.get("id") or not rule.get("angle"):
+                errors.append(f"{where}: needs both 'id' and 'angle'")
+                continue
+            when = rule.get("when") or {}
+            if not isinstance(when, dict):
+                errors.append(f"{where} ({rule['id']}): 'when' must be a mapping")
+                continue
+            bad = set(when) - COND_KEYS
+            if bad:
+                errors.append(
+                    f"{where} ({rule['id']}): unknown condition {', '.join(sorted(bad))}"
+                )
+                continue
+            if "github_min_repos" in when:
+                try:
+                    int(when["github_min_repos"])
+                except (TypeError, ValueError):
+                    errors.append(f"{where} ({rule['id']}): github_min_repos must be a number")
+                    continue
+            rule = dict(rule)
+            rule["when"] = when
+            rule["playbook"] = pb_name
+            rules.append(rule)
+    return rules, errors
+
+
+def match(when, site, gh):
+    stack = {s.lower() for s in site["stack"]}
+    pages = {p for p, ok in site["pages"].items() if ok}
+    text = " ".join([site["title"], site["description"], site["headline"]]).lower()
+    gh_ok = bool(gh) and "error" not in gh
+    langs = {l.lower() for l in gh["languages"]} if gh_ok else set()
+
+    for key, val in when.items():
+        if key == "has_tech":
+            ok = bool(stack & set(as_list(val)))
+        elif key == "has_all_tech":
+            ok = set(as_list(val)) <= stack
+        elif key == "lacks_tech":
+            ok = not (stack & set(as_list(val)))
+        elif key == "has_page":
+            ok = bool(pages & set(as_list(val)))
+        elif key == "lacks_page":
+            ok = not (pages & set(as_list(val)))
+        elif key == "hiring_platform":
+            ok = bool(site["ats"]) == bool(val)
+        elif key == "github_min_repos":
+            ok = gh_ok and gh["public_repos"] >= int(val)
+        elif key == "github_language":
+            ok = bool(langs & set(as_list(val)))
+        elif key == "text_contains":
+            ok = any(w in text for w in as_list(val))
+        else:
+            ok = False
+        if not ok:
+            return False
+    return True
+
+
+def run_playbooks(domain, site, gh, rules):
+    tm = "Google Analytics/GTM" in site["stack"]
+    verify = " (tag manager detected, verify first)" if tm else " (homepage only, verify first)"
+    hits = []
+    for r in rules:
+        if not match(r["when"], site, gh):
+            continue
+        text = str(r["angle"])
+        text = text.replace("{domain}", domain)
+        text = text.replace("{ats}", ", ".join(site["ats"]))
+        text = text.replace("{stack}", ", ".join(site["stack"]))
+        if r.get("verify"):
+            text = text.rstrip(".") + verify + "."
+        try:
+            prio = int(r.get("priority", 0))
+        except (TypeError, ValueError):
+            prio = 0
+        hits.append(
+            {"id": str(r["id"]), "playbook": r["playbook"], "angle": text, "priority": prio}
+        )
+    hits.sort(key=lambda h: -h["priority"])
+    return hits
+
+
+def builtin_angles(site, gh):
+    """Fallback when no playbooks can be loaded."""
     s = set(site["stack"])
     pages = site["pages"]
     tm = "Google Analytics/GTM" in s
-    verify = (
-        " (tag manager detected, verify first)" if tm else " (homepage only, verify first)"
-    )
+    verify = " (tag manager detected, verify first)" if tm else " (homepage only, verify first)"
     out = []
     if site["ats"]:
         out.append(f"Hiring via {', '.join(site['ats'])}: open roles are a growth signal, reference them.")
@@ -222,10 +367,12 @@ def outreach_angles(site, gh):
         out.append("No CRM/marketing tag in homepage HTML: tooling may be early" + verify + ".")
     if gh and "error" not in gh and gh["public_repos"] > 0:
         out.append("Public GitHub presence: developer-led motion, technical outreach can land.")
-    return out or ["No strong signals found: open with a generic value-first message."]
+    return out
 
 
-def research(domain_raw, gh_name=None):
+# ------------------------------------------------------------------ report
+
+def research(domain_raw, gh_name=None, rules=None):
     domain = clean_domain(domain_raw)
     if "." in domain:
         site = analyze_site(domain)
@@ -234,13 +381,25 @@ def research(domain_raw, gh_name=None):
     if not gh_name and "error" not in site:
         gh_name = site["socials"].get("GitHub", "").rsplit("/", 1)[-1] or None
     gh = github_info(gh_name) if gh_name else None
-    angles = outreach_angles(site, gh) if "error" not in site else []
+
+    angles, signals = [], []
+    if "error" not in site:
+        if rules:
+            hits = run_playbooks(domain, site, gh, rules)
+            angles = [h["angle"] for h in hits]
+            signals = [{"id": h["id"], "playbook": h["playbook"]} for h in hits]
+        else:
+            angles = builtin_angles(site, gh)
+        if not angles:
+            angles = ["No rules matched: open with a generic value-first message."]
+
     return {
         "domain": domain,
         "date": str(date.today()),
         "site": site,
         "github": gh,
         "angles": angles,
+        "signals": signals,
     }
 
 
@@ -318,8 +477,25 @@ def main():
     ap.add_argument("--file", help="text file, one 'domain' or 'domain,github' per line")
     ap.add_argument("--json", action="store_true", help="write JSON instead of Markdown")
     ap.add_argument("--out", default="briefs", help="output folder")
+    ap.add_argument("--playbooks", default=str(DEFAULT_PLAYBOOKS),
+                    help="playbook file or folder (default: ./playbooks next to acr.py)")
+    ap.add_argument("--check-playbooks", action="store_true",
+                    help="validate playbook files and exit")
     ap.add_argument("--version", action="version", version=f"acr {VERSION}")
     args = ap.parse_args()
+
+    rules, errors = load_playbooks(args.playbooks)
+
+    if args.check_playbooks:
+        for e in errors:
+            print(f"[ERR] {e}")
+        print(f"[+] {len(rules)} valid rule(s) loaded from {args.playbooks}")
+        sys.exit(1 if errors else 0)
+
+    for e in errors:
+        print(f"[warn] {e}", file=sys.stderr)
+    if not rules:
+        print("[warn] no playbook rules loaded, using built-in angles", file=sys.stderr)
 
     targets = []
     if args.file:
@@ -331,9 +507,9 @@ def main():
     if not targets:
         ap.error("give a domain or --file")
 
-    print(f"[*] Researching {len(targets)} account(s) ...")
+    print(f"[*] Researching {len(targets)} account(s), {len(rules)} playbook rule(s) ...")
     with ThreadPoolExecutor(max_workers=3) as ex:
-        results = list(ex.map(lambda t: research(*t), targets))
+        results = list(ex.map(lambda t: research(t[0], t[1], rules), targets))
 
     for d in results:
         path, content = save(d, args.out, args.json)

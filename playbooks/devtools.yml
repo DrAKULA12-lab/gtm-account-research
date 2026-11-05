@@ -1,0 +1,20 @@
+name: Developer tools
+description: Angles for companies with a strong open-source or developer footprint.
+rules:
+  - id: oss-heavy
+    when:
+      github_min_repos: 20
+    angle: "Large open-source footprint at {domain}: lead with developer experience and integrations, not sales language."
+    priority: 8
+
+  - id: typescript-shop
+    when:
+      github_language: [TypeScript]
+    angle: "TypeScript-heavy org: API docs and SDK examples will resonate more than a pitch deck."
+    priority: 5
+
+  - id: ai-positioning
+    when:
+      text_contains: ["artificial intelligence", "llm", "ai agents", "ai-powered", "generative ai"]
+    angle: "Positions itself around AI: ask how they handle evaluation, cost and reliability."
+    priority: 5

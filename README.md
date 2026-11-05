@@ -56,3 +56,11 @@ and respect privacy laws when contacting people.
 ## License
 
 MIT
+
+## Playbooks
+
+Outreach angles come from YAML rules in playbooks/, so you can add your own
+without writing Python. See playbooks/README.md for the format.
+
+    python acr.py --check-playbooks
+    python acr.py stripe.com --playbooks playbooks/devtools.yml
