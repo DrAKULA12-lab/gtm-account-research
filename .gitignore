@@ -1,3 +1,9 @@
 briefs/
-__pycache__/
 domains.txt
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/

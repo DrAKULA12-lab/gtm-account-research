@@ -1,0 +1,16 @@
+# Hiring platforms (applicant tracking systems).
+# signature: a lowercase URL fragment found on a careers or jobs page.
+- name: Greenhouse
+  signature: "greenhouse.io"
+- name: Lever
+  signature: "lever.co"
+- name: Ashby
+  signature: "ashbyhq.com"
+- name: Workable
+  signature: "workable.com"
+- name: SmartRecruiters
+  signature: "smartrecruiters.com"
+- name: BambooHR
+  signature: "bamboohr.com"
+- name: Workday
+  signature: "myworkdayjobs.com"

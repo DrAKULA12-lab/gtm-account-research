@@ -1,28 +1,53 @@
 # gtm-account-research
 
+[
+
+![CI](https://github.com/DrAKULA12-lab/gtm-account-research/actions/workflows/ci.yml/badge.svg)
+
+](https://github.com/DrAKULA12-lab/gtm-account-research/actions/workflows/ci.yml)
+[
+
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+
+](LICENSE)
+
+
+![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
+
+
+
 Open-source CLI that turns a company domain into a one-page account brief
-for GTM and outbound teams. Public sources only, no API keys required.
+for GTM and outbound teams. Public sources only. No API keys.
+
+Built in the open so the GTM community can share signals and playbooks
+instead of only consuming other people's tools.
 
 ## What you get
 
 - Company overview (title, description, headline)
-- Detected tech stack (CRM, chat, analytics, frameworks)
-- Social links and GitHub activity (auto-detected)
+- Detected tech stack with categories (CRM, chat, analytics, payments...)
+- Social links and GitHub activity, found automatically
 - Hiring signals (Greenhouse, Lever, Ashby and more)
-- Suggested outreach angles
+- Outreach angles from YAML playbooks anyone can edit
 
 ## Install
 
-    pip install -r requirements.txt
+    pip install git+https://github.com/DrAKULA12-lab/gtm-account-research.git
+
+Or from source:
+
+    git clone https://github.com/DrAKULA12-lab/gtm-account-research.git
+    cd gtm-account-research
+    pip install -e .
 
 ## Usage
 
-    python acr.py stripe.com
-    python acr.py stripe.com --github stripe
-    python acr.py stripe.com --json
-    python acr.py --file domains.txt
+    acr stripe.com
+    acr stripe.com --github stripe
+    acr stripe.com --json
+    acr --file domains.txt
 
-domains.txt format, one per line, optional GitHub name after a comma:
+domains.txt: one domain per line, optional GitHub name after a comma.
 
     hubspot.com,hubspot
     notion.so
@@ -30,37 +55,59 @@ domains.txt format, one per line, optional GitHub name after a comma:
 Briefs are saved in the briefs/ folder.
 Set GITHUB_TOKEN to raise the GitHub API rate limit.
 
+## Example output
+
+    ## Suggested Outreach Angles
+    - Careers page is live: check open roles as a growth signal.
+    - Public pricing page: self-serve motion, lead with time-to-value.
+    - Large open-source footprint at stripe.com: lead with developer experience and integrations.
+
+## How it works
+
+1. Collect: homepage HTML, key pages (careers, pricing...) and the GitHub API.
+2. Detect: match technologies and hiring platforms using acr/data/*.yml.
+3. Decide: apply the rules in acr/playbooks/*.yml to produce outreach angles.
+4. Report: write a Markdown or JSON brief.
+
+## Extend it without writing Python
+
+- Add a technology: edit acr/data/tech.yml
+- Add a hiring platform: edit acr/data/ats.yml
+- Add outreach rules: add a file in acr/playbooks/ (see acr/playbooks/README.md)
+
+Example tech entry:
+
+    - name: ExampleCRM
+      category: crm
+      signatures: ["cdn.examplecrm.com", "examplecrm-tracker"]
+
+Check your changes:
+
+    acr --check-playbooks
+    pytest
+
 ## Limits
 
-Signals come from the public homepage HTML and the GitHub API.
-Tools loaded through a tag manager or after login will not appear.
-Treat gaps as hints to verify, not facts.
-
-## Roadmap
-
-- playbooks/ folder with YAML signal rules anyone can contribute
-- Optional AI summary of each brief
-- CSV export for batch runs
-- Job count and role categories
-
-## Contributing
-
-Add a tech signature to TECH, an ATS to ATS, or an outreach rule.
-Small PRs are welcome.
+Signals come from public homepage HTML and the GitHub API. Tools loaded through
+a tag manager or after login will not appear. Treat gaps as hints to verify.
 
 ## Responsible use
 
-Public pages only. Be polite with request volume, follow each site's terms,
-and respect privacy laws when contacting people.
+Public pages only. Keep request volume low, follow each site's terms, and respect
+privacy laws when contacting people.
+
+## Roadmap
+
+- [x] YAML playbooks and data files
+- [ ] CSV export for batch runs
+- [ ] More technology and hiring platform signatures
+- [ ] Optional AI summary and outreach draft per brief
+- [ ] MCP server so AI agents can call acr as a tool
+
+## Contributing
+
+See CONTRIBUTING.md. The easiest first contribution is a YAML entry.
 
 ## License
 
 MIT
-
-## Playbooks
-
-Outreach angles come from YAML rules in playbooks/, so you can add your own
-without writing Python. See playbooks/README.md for the format.
-
-    python acr.py --check-playbooks
-    python acr.py stripe.com --playbooks playbooks/devtools.yml

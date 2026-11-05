@@ -28,20 +28,20 @@ rules:
 
   - id: analytics-in-place
     when:
-      has_tech: [Segment, Mixpanel, Amplitude, PostHog]
+      has_category: [analytics]
     angle: "Product analytics in place: data-driven team, lead with metrics."
     priority: 6
 
   - id: no-chat
     when:
-      lacks_tech: [Intercom, Drift, Zendesk, Crisp]
+      lacks_category: [chat]
     angle: "No chat widget in homepage HTML: possible inbound gap."
     verify: true
     priority: 3
 
   - id: no-crm
     when:
-      lacks_tech: [HubSpot, Salesforce/Pardot, Marketo]
+      lacks_category: [crm]
     angle: "No CRM/marketing tag in homepage HTML: tooling may be early."
     verify: true
     priority: 2

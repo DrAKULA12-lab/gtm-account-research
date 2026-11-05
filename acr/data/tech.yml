@@ -1,0 +1,69 @@
+# Technology signatures.
+# name: shown in the brief. category: used by playbooks (has_category / lacks_category).
+# signatures: lowercase strings searched in the homepage HTML. One match is enough.
+- name: HubSpot
+  category: crm
+  signatures: ["js.hs-scripts.com", "js.hsforms.net", "hs-analytics.net"]
+- name: Salesforce/Pardot
+  category: crm
+  signatures: ["pardot.com", "pi.pardot", "force.com"]
+- name: Marketo
+  category: crm
+  signatures: ["munchkin.marketo.net", "mktoforms"]
+- name: Intercom
+  category: chat
+  signatures: ["widget.intercom.io", "intercomsettings"]
+- name: Drift
+  category: chat
+  signatures: ["js.driftt.com", "drift.com/include"]
+- name: Zendesk
+  category: chat
+  signatures: ["static.zdassets.com", "zendesk.com/embeddable"]
+- name: Crisp
+  category: chat
+  signatures: ["client.crisp.chat"]
+- name: Segment
+  category: analytics
+  signatures: ["cdn.segment.com"]
+- name: Mixpanel
+  category: analytics
+  signatures: ["cdn.mxpnl.com", "mixpanel.com/"]
+- name: Amplitude
+  category: analytics
+  signatures: ["cdn.amplitude.com", "amplitude.com/libs"]
+- name: PostHog
+  category: analytics
+  signatures: ["posthog.init", "i.posthog.com"]
+- name: Hotjar
+  category: analytics
+  signatures: ["static.hotjar.com"]
+- name: Google Analytics/GTM
+  category: tag-manager
+  signatures: ["googletagmanager.com", "google-analytics.com"]
+- name: Meta Pixel
+  category: advertising
+  signatures: ["connect.facebook.net", "fbq("]
+- name: LinkedIn Insight
+  category: advertising
+  signatures: ["snap.licdn.com"]
+- name: Stripe
+  category: payments
+  signatures: ["js.stripe.com"]
+- name: Shopify
+  category: ecommerce
+  signatures: ["cdn.shopify.com"]
+- name: WordPress
+  category: cms
+  signatures: ["wp-content", "wp-includes"]
+- name: Webflow
+  category: cms
+  signatures: ["data-wf-page", "assets.website-files.com"]
+- name: Next.js
+  category: framework
+  signatures: ["/_next/", "__next_data__"]
+- name: Calendly
+  category: scheduling
+  signatures: ["assets.calendly.com", "calendly.com/"]
+- name: Typeform
+  category: forms
+  signatures: ["embed.typeform.com"]
