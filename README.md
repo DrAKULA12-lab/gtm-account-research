@@ -1,20 +1,10 @@
 # gtm-account-research
 
-[
-
-![CI](https://github.com/DrAKULA12-lab/gtm-account-research/actions/workflows/ci.yml/badge.svg)
-
-](https://github.com/DrAKULA12-lab/gtm-account-research/actions/workflows/ci.yml)
-[
-
-![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
-
-](LICENSE)
-
-
-![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
-
-
+<p>
+<a href="https://github.com/DrAKULA12-lab/gtm-account-research/actions/workflows/ci.yml"><img src="https://github.com/DrAKULA12-lab/gtm-account-research/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+<a href="https://github.com/DrAKULA12-lab/gtm-account-research/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
+<img src="https://img.shields.io/badge/python-3.9%2B-blue.svg" alt="Python 3.9+">
+</p>
 
 Open-source CLI that turns a company domain into a one-page account brief
 for GTM and outbound teams. Public sources only. No API keys.
