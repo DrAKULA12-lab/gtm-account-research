@@ -20,6 +20,7 @@ instead of only consuming other people's tools.
 - Hiring signals (Greenhouse, Lever, Ashby and more)
 - Outreach angles from YAML playbooks anyone can edit
 - Batch mode with a one-row-per-account CSV summary
+- An MCP server, so AI agents can call it as a tool
 
 ## Install
 
@@ -63,6 +64,15 @@ Set GITHUB_TOKEN to raise the GitHub API rate limit.
 3. Decide: apply the rules in acr/playbooks/*.yml to produce outreach angles.
 4. Report: write a Markdown or JSON brief, and an optional CSV summary.
 
+## Use it from AI agents (MCP)
+
+acr also ships an MCP server, so an agent can research companies by calling it as a tool.
+
+    claude mcp add acr -- acr-mcp
+    acr-mcp --selftest linear.app
+
+It only talks to public internet hosts and is read-only. Setup for other clients and the security model are in docs/mcp.md.
+
 ## Extend it without writing Python
 
 - Add a technology: edit acr/data/tech.yml
@@ -96,7 +106,7 @@ privacy laws when contacting people.
 - [x] CSV export for batch runs
 - [ ] More technology and hiring platform signatures
 - [ ] Optional AI summary and outreach draft per brief
-- [ ] MCP server so AI agents can call acr as a tool
+- [x] MCP server so AI agents can call acr as a tool
 
 ## Contributing
 

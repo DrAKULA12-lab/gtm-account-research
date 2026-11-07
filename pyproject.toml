@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gtm-account-research"
 dynamic = ["version"]
-description = "Open-source CLI that turns a company domain into a one-page GTM account brief from public sources."
+description = "Open-source CLI and MCP server that turn a company domain into a one-page GTM account brief from public sources."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Yassine" }]
-keywords = ["gtm", "sales", "outbound", "osint", "account-research", "ai-agents"]
+keywords = ["gtm", "sales", "outbound", "osint", "account-research", "ai-agents", "mcp"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -29,6 +29,7 @@ dev = ["pytest>=7", "ruff>=0.5"]
 
 [project.scripts]
 acr = "acr.cli:main"
+acr-mcp = "acr.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/DrAKULA12-lab/gtm-account-research"

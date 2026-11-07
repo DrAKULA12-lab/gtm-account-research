@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0
+
+- New `acr-mcp` command: an MCP server so AI agents (Claude and other MCP clients) can call
+  acr as a tool. Tools: `research_account`, `research_accounts`, `list_playbook_rules`
+- No new dependencies: the protocol is implemented over stdio with the standard library
+- Network guard for agent use: public hosts only, redirects checked, no credentials or custom
+  ports, website text truncated and labeled as untrusted
+- `acr-mcp --selftest [domain]` checks the server from the command line
+- See docs/mcp.md
+
 ## 0.5.0
 
 - `--csv` writes one summary row per account to `summary.csv` (works with `--file` batches)
