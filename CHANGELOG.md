@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- `--csv` writes one summary row per account to `summary.csv` (works with `--file` batches)
+- CSV cells that start with `=`, `+`, `-` or `@` are neutralized, so data scraped from websites
+  cannot run as a spreadsheet formula
+- UTF-8 with BOM, so Excel shows accents and Arabic correctly
+
 ## 0.4.0
 
 - Restructured as a Python package with an `acr` command

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from acr import __version__
 from acr.core import research
+from acr.export import write_csv
 from acr.playbooks import DEFAULT_PLAYBOOKS, load_playbooks
 from acr.report import save
 
@@ -29,6 +30,9 @@ def build_parser():
     ap.add_argument("--github", help="GitHub org/user (auto-detected if omitted)")
     ap.add_argument("--file", help="text file, one 'domain' or 'domain,github' per line")
     ap.add_argument("--json", action="store_true", help="write JSON instead of Markdown")
+    ap.add_argument(
+        "--csv", action="store_true", help="also write one summary row per domain to summary.csv"
+    )
     ap.add_argument("--out", default="briefs", help="output folder")
     ap.add_argument(
         "--playbooks",
@@ -73,10 +77,14 @@ def main(argv=None):
 
     for d in results:
         path, content = save(d, args.out, args.json)
-        if len(results) == 1:
+        if len(results) == 1 and not args.csv:
             print(content)
         status = "ERR" if "error" in d["site"] else "OK"
         print(f"[{status}] {d['domain']} -> {path}")
+
+    if args.csv:
+        csv_path = write_csv(results, Path(args.out) / "summary.csv")
+        print(f"[+] Summary of {len(results)} account(s) -> {csv_path}")
 
 
 if __name__ == "__main__":

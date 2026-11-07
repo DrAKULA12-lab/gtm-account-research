@@ -19,6 +19,7 @@ instead of only consuming other people's tools.
 - Social links and GitHub activity, found automatically
 - Hiring signals (Greenhouse, Lever, Ashby and more)
 - Outreach angles from YAML playbooks anyone can edit
+- Batch mode with a one-row-per-account CSV summary
 
 ## Install
 
@@ -35,14 +36,17 @@ Or from source:
     acr stripe.com
     acr stripe.com --github stripe
     acr stripe.com --json
-    acr --file domains.txt
+    acr --file domains.txt --csv
 
 domains.txt: one domain per line, optional GitHub name after a comma.
 
     hubspot.com,hubspot
     notion.so
 
-Briefs are saved in the briefs/ folder.
+Briefs are saved in the briefs/ folder. With `--csv`, briefs/summary.csv holds
+one row per account (tech stack, hiring platform, GitHub stats, top angle, all angles),
+ready to open in Excel or Google Sheets.
+
 Set GITHUB_TOKEN to raise the GitHub API rate limit.
 
 ## Example output
@@ -57,7 +61,7 @@ Set GITHUB_TOKEN to raise the GitHub API rate limit.
 1. Collect: homepage HTML, key pages (careers, pricing...) and the GitHub API.
 2. Detect: match technologies and hiring platforms using acr/data/*.yml.
 3. Decide: apply the rules in acr/playbooks/*.yml to produce outreach angles.
-4. Report: write a Markdown or JSON brief.
+4. Report: write a Markdown or JSON brief, and an optional CSV summary.
 
 ## Extend it without writing Python
 
@@ -89,7 +93,7 @@ privacy laws when contacting people.
 ## Roadmap
 
 - [x] YAML playbooks and data files
-- [ ] CSV export for batch runs
+- [x] CSV export for batch runs
 - [ ] More technology and hiring platform signatures
 - [ ] Optional AI summary and outreach draft per brief
 - [ ] MCP server so AI agents can call acr as a tool
