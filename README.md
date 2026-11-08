@@ -115,3 +115,40 @@ See CONTRIBUTING.md. The easiest first contribution is a YAML entry.
 ## License
 
 MIT
+
+## Use acr from AI agents (MCP)
+
+acr includes an [MCP](https://modelcontextprotocol.io) server, so AI agents can call it as a tool. It needs Python 3.10 or newer.
+
+**Tools**
+
+| Tool | What it does |
+|------|--------------|
+| `research_account` | Builds a GTM account brief for one company domain |
+| `research_accounts` | Builds briefs for up to 10 domains at once |
+| `list_playbook_rules` | Lists the playbook rules acr uses |
+
+**Connect it**
+
+Claude Code:
+
+~~~bash
+claude mcp add acr -- python -m acr.mcp_server
+~~~
+
+Other MCP clients (Claude Desktop, Cursor, etc.) use the same command in their config:
+
+~~~json
+{
+  "mcpServers": {
+    "acr": {
+      "command": "python",
+      "args": ["-m", "acr.mcp_server"]
+    }
+  }
+}
+~~~
+
+Then ask your agent: "Research stripe.com with acr."
+
+**Security note:** page titles and descriptions come from third-party websites. acr labels them as data, so agents should never treat them as instructions.
