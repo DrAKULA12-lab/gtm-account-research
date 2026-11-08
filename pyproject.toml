@@ -7,7 +7,7 @@ name = "gtm-account-research"
 dynamic = ["version"]
 description = "Open-source CLI and MCP server that turn a company domain into a one-page GTM account brief from public sources."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Yassine" }]
 keywords = ["gtm", "sales", "outbound", "osint", "account-research", "ai-agents", "mcp"]
