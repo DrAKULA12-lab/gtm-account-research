@@ -67,3 +67,6 @@ jobs:
           else
             echo "No tests found, skipping"
           fi
+
+      - name: MCP server smoke test
+        run: python scripts/mcp_smoke.py python -m acr.mcp_server
