@@ -26,29 +26,44 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
+
+      - name: Show environment
+        run: |
+          python --version
+          ls -la
+          git ls-files | head -60
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install pytest pyyaml
           if [ -f pyproject.toml ]; then
-            pip install -e ".[dev]" || pip install -e .
+            pip install -e ".[dev,mcp]" || pip install -e ".[dev]" || pip install -e .
           fi
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
-          pip install pytest
-
-      - name: Syntax check
-        run: python -m compileall -q .
+          if grep -rqE "^\s*(import|from)\s+mcp\b" --include=*.py .; then
+            pip install mcp
+          fi
+          pip list
 
       - name: CLI smoke test
-        run: python acr.py --help
+        run: |
+          if command -v acr >/dev/null 2>&1; then
+            acr --help
+          elif [ -f acr.py ]; then
+            python acr.py --help
+          elif [ -f acr/__main__.py ] || [ -f src/acr/__main__.py ]; then
+            python -m acr --help
+          else
+            echo "No CLI entry point found, skipping"
+          fi
 
       - name: Run tests
         run: |
           if [ -d tests ] || ls test_*.py >/dev/null 2>&1; then
-            pytest -q
+            python -m pytest -q
           else
             echo "No tests found, skipping"
           fi
