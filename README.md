@@ -118,7 +118,7 @@ MIT
 
 ## Use acr from AI agents (MCP)
 
-acr includes an [MCP](https://modelcontextprotocol.io) server, so AI agents can call it as a tool. It needs Python 3.10 or newer.
+acr includes an [MCP](https://modelcontextprotocol.io) server, so AI agents can call it as a tool. Install with `pip install "gtm-account-research[mcp]"` (Python 3.10 or newer).
 
 **Tools**
 

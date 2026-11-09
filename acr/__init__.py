@@ -1,3 +1,3 @@
 """GTM Account Research: turn a company domain into a one-page account brief."""
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
