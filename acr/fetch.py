@@ -29,7 +29,7 @@ def _check_redirect(response, *args, **kwargs):
     return response
 
 
-def get(url, headers=None, retries=1):
+def _get_network(url, headers=None, retries=1):
     """GET a URL. Returns a Response, or None if blocked or every attempt failed."""
     if _url_guard and not _url_guard(url):
         return None
@@ -45,3 +45,22 @@ def get(url, headers=None, retries=1):
         except requests.RequestException:
             continue
     return None
+
+
+def get(url, headers=None, retries=1):
+    """GET a URL, using the on-disk cache for plain public requests."""
+    from acr import cache
+
+    if _url_guard and not _url_guard(url):
+        return None
+    use_cache = not (
+        headers and any(k.lower() == "authorization" for k in headers)
+    )
+    if use_cache:
+        hit = cache.load(url)
+        if hit is not None:
+            return hit
+    response = _get_network(url, headers=headers, retries=retries)
+    if use_cache and response is not None and response.status_code == 200:
+        cache.save(url, response)
+    return response
