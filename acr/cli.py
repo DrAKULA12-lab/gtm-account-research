@@ -43,12 +43,17 @@ def build_parser():
         "--check-playbooks", action="store_true", help="validate playbook files and exit"
     )
     ap.add_argument("--version", action="version", version=f"acr {__version__}")
+    ap.add_argument("--no-cache", action="store_true", help="ignore the page cache and fetch fresh pages")
     return ap
 
 
 def main(argv=None):
     ap = build_parser()
     args = ap.parse_args(argv)
+    if args.no_cache:
+        import os
+
+        os.environ["ACR_NO_CACHE"] = "1"
 
     rules, errors = load_playbooks(args.playbooks)
 

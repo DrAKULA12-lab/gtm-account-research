@@ -152,3 +152,7 @@ Other MCP clients (Claude Desktop, Cursor, etc.) use the same command in their c
 Then ask your agent: "Research stripe.com with acr."
 
 **Security note:** page titles and descriptions come from third-party websites. acr labels them as data, so agents should never treat them as instructions.
+
+## Cache
+
+acr keeps fetched pages in `~/.cache/acr` for 24 hours, so repeat runs are fast and gentle on websites. Use `--no-cache` for fresh data, or set `ACR_NO_CACHE=1`. `ACR_CACHE_TTL` (in seconds) and `ACR_CACHE_DIR` change how long pages are kept and where.
