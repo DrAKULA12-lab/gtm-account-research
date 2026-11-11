@@ -63,3 +63,21 @@ def test_get_skips_cache_for_authorized_requests(monkeypatch):
     fetch.get(URL, headers={"Authorization": "token x"})
     fetch.get(URL, headers={"Authorization": "token x"})
     assert len(calls) == 2
+
+
+def test_old_entries_are_pruned(monkeypatch):
+    import os
+
+    cache.save(URL, make_response())
+    path = cache._path(URL)
+    old = path.stat().st_mtime - 10 * 24 * 60 * 60
+    os.utime(path, (old, old))
+    monkeypatch.setattr(cache, "_pruned", False)
+    cache.save("https://other.example/", make_response())
+    assert not path.exists()
+
+
+def test_large_pages_are_not_cached(monkeypatch):
+    monkeypatch.setattr(cache, "MAX_BYTES", 10)
+    cache.save(URL, make_response(b"x" * 100))
+    assert cache.load(URL) is None

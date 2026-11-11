@@ -9,6 +9,7 @@ import base64
 import hashlib
 import json
 import os
+import threading
 import time
 from pathlib import Path
 
@@ -16,6 +17,8 @@ import requests
 from requests.structures import CaseInsensitiveDict
 
 DEFAULT_TTL = 24 * 60 * 60
+MAX_BYTES = 2_000_000  # pages larger than this are not cached
+_pruned = False
 
 
 def enabled():
@@ -56,11 +59,30 @@ def load(url):
         return None
 
 
+def _prune(folder):
+    """Delete entries older than the cache lifetime. Runs once per process."""
+    global _pruned
+    if _pruned:
+        return
+    _pruned = True
+    cutoff = time.time() - _ttl()
+    try:
+        for f in folder.glob("*.json"):
+            try:
+                if f.stat().st_mtime < cutoff:
+                    f.unlink()
+            except OSError:
+                pass
+    except OSError:
+        pass
+
+
 def save(url, response):
     """Store a response on disk. Failures are ignored."""
-    if not enabled():
+    if not enabled() or len(response.content) > MAX_BYTES:
         return
     path = _path(url)
+    _prune(path.parent)
     data = {
         "fetched_at": time.time(),
         "status": response.status_code,
@@ -71,7 +93,7 @@ def save(url, response):
     }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".tmp")
+        tmp = path.with_name(f"{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
         tmp.write_text(json.dumps(data), encoding="utf-8")
         os.replace(tmp, path)
     except OSError:

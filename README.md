@@ -24,7 +24,7 @@ instead of only consuming other people's tools.
 
 ## Install
 
-    pip install git+https://github.com/DrAKULA12-lab/gtm-account-research.git
+    pip install gtm-account-research
 
 Or from source:
 
@@ -118,7 +118,7 @@ MIT
 
 ## Use acr from AI agents (MCP)
 
-acr includes an [MCP](https://modelcontextprotocol.io) server, so AI agents can call it as a tool. Install with `pip install "gtm-account-research[mcp]"` (Python 3.10 or newer).
+acr includes an [MCP](https://modelcontextprotocol.io) server, so AI agents can call it as a tool. Install with `pip install gtm-account-research` (Python 3.10 or newer). The server needs no extra libraries.
 
 **Tools**
 

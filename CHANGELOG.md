@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.7.1
+
+- GitHub names are validated before they are used in an API URL
+- Page cache removes expired entries, skips pages over 2 MB and writes files safely when
+  several accounts are researched at once
+- `pip install gtm-account-research` is the install command; the MCP server needs no extra
+  libraries (the `mcp` extra is only for testing with the official MCP client)
+
+## 0.7.0
+
+- On-disk page cache (24 hours by default) so repeat runs are fast and gentle on websites.
+  Settings: `--no-cache`, `ACR_NO_CACHE`, `ACR_CACHE_TTL`, `ACR_CACHE_DIR`
+
+## 0.6.1
+
+- Added the optional `mcp` extra (the official MCP client library, used for testing)
+
 ## 0.6.0
 
 - New `acr-mcp` command: an MCP server so AI agents (Claude and other MCP clients) can call

@@ -15,7 +15,7 @@ All three are read-only. They make live requests to public websites and the GitH
 
 ## Install
 
-    pip install git+https://github.com/DrAKULA12-lab/gtm-account-research.git
+    pip install gtm-account-research
 
 This installs two commands: `acr` and `acr-mcp`. Check the server works:
 

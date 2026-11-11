@@ -1,13 +1,18 @@
 """GitHub public API lookups for an organization or user."""
 
 import os
+import re
 from collections import Counter
 
 from acr.fetch import get
 
+_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,38}$")
+
 
 def github_info(name):
     """Return a summary of a GitHub org/user, or {'error': ...}."""
+    if not isinstance(name, str) or not _NAME.match(name):
+        return {"error": f"'{name}' is not a valid GitHub name"}
     headers = {"Accept": "application/vnd.github+json"}
     token = os.environ.get("GITHUB_TOKEN")
     if token:
