@@ -1,5 +1,6 @@
 """HTTP helper: polite user agent, timeout, a single retry and an optional URL guard."""
 
+import threading
 from urllib.parse import urljoin
 
 import requests
@@ -12,6 +13,33 @@ TIMEOUT = 12
 # Optional callable(url) -> bool. When set, every request and every redirect target
 # must pass it. The MCP server uses this to keep AI agents away from private networks.
 _url_guard = None
+
+_local = threading.local()
+
+
+def last_error():
+    """Short reason the latest get() on this thread returned None ('' if none)."""
+    return getattr(_local, "error", "")
+
+
+def clear_error():
+    """Forget the last error for this thread."""
+    _local.error = ""
+
+
+def _describe(exc):
+    """Turn a requests exception into a short reason a person can act on."""
+    if isinstance(exc, requests.exceptions.SSLError):
+        return "SSL certificate problem"
+    if isinstance(exc, requests.exceptions.Timeout):
+        return "timed out"
+    if isinstance(exc, requests.exceptions.TooManyRedirects):
+        return "too many redirects"
+    if isinstance(exc, requests.exceptions.InvalidURL) and "redirect blocked" in str(exc):
+        return "redirected to a blocked address"
+    if isinstance(exc, requests.exceptions.ConnectionError):
+        return "could not connect (DNS or network problem)"
+    return "request failed"
 
 
 def set_url_guard(guard):
@@ -31,7 +59,9 @@ def _check_redirect(response, *args, **kwargs):
 
 def _get_network(url, headers=None, retries=1):
     """GET a URL. Returns a Response, or None if blocked or every attempt failed."""
+    _local.error = ""
     if _url_guard and not _url_guard(url):
+        _local.error = "blocked by the network safety guard"
         return None
     h = {"User-Agent": UA}
     if headers:
@@ -42,7 +72,8 @@ def _get_network(url, headers=None, retries=1):
             return requests.get(
                 url, headers=h, timeout=TIMEOUT, allow_redirects=True, hooks=hooks
             )
-        except requests.RequestException:
+        except requests.RequestException as exc:
+            _local.error = _describe(exc)
             continue
     return None
 
@@ -51,7 +82,9 @@ def get(url, headers=None, retries=1):
     """GET a URL, using the on-disk cache for plain public requests."""
     from acr import cache
 
+    _local.error = ""
     if _url_guard and not _url_guard(url):
+        _local.error = "blocked by the network safety guard"
         return None
     use_cache = not (
         headers and any(k.lower() == "authorization" for k in headers)

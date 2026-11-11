@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
-from acr.fetch import get
+from acr.fetch import clear_error, get, last_error
 from acr.signatures import load_ats, load_tech
 
 _P = r"(?<![\w.-])(?:www\.)?"
@@ -74,12 +74,15 @@ def check_page(home_url, name):
 def analyze_site(domain):
     """Fetch the homepage and key pages. Returns a signals dict, or {'error': ...}."""
     r = None
+    clear_error()
     for host in (domain, "www." + domain):
         r = get(f"https://{host}")
         if r is not None and r.status_code < 400:
             break
     if r is None:
-        return {"error": f"Could not reach {domain}"}
+        reason = last_error()
+        suffix = f" ({reason})" if reason else ""
+        return {"error": f"Could not reach {domain}{suffix}"}
     if r.status_code >= 400:
         return {"error": f"{domain} returned HTTP {r.status_code} (site may block bots)"}
     if "html" not in r.headers.get("content-type", "").lower():
