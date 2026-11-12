@@ -10,6 +10,15 @@
 - name: Marketo
   category: crm
   signatures: ["munchkin.marketo.net", "mktoforms"]
+- name: Pipedrive
+  category: crm
+  signatures: ["webforms.pipedrive.com", "leadbooster-chat.pipedrive.com"]
+- name: Apollo
+  category: crm
+  signatures: ["assets.apollo.io", "apollo.io/match"]
+- name: Clearbit
+  category: analytics
+  signatures: ["tag.clearbitscripts.com", "clearbit.com/v1/"]
 - name: Intercom
   category: chat
   signatures: ["widget.intercom.io", "intercomsettings"]
