@@ -16,9 +16,21 @@
 - name: Apollo
   category: crm
   signatures: ["assets.apollo.io", "apollo.io/match"]
+- name: Salesloft
+  category: crm
+  signatures: ["salesloft.com", "assets.salesloft.com"]
+- name: Gong
+  category: crm
+  signatures: ["gong.io", "cdn.gong.io", "assets.gong.io"]
 - name: Clearbit
   category: analytics
   signatures: ["tag.clearbitscripts.com", "clearbit.com/v1/"]
+- name: Braze
+  category: analytics
+  signatures: ["cdn.braze.com", "braze.com"]
+- name: Notion
+  category: cms
+  signatures: ["notion-static.com", "notion.so"]
 - name: Intercom
   category: chat
   signatures: ["widget.intercom.io", "intercomsettings"]
